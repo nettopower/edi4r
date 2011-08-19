@@ -465,12 +465,12 @@ module EDI
 
     def Interchange.parse( hnd, auto_validate=true )
       case rc=Interchange.detect( hnd )
-      when 'BZ': Interchange.parse( EDI::Bzip2Reader.new( hnd ) ) # see "peek"
-      when 'GZ': Interchange.parse( Zlib::GzipReader.new( hnd ) )
-      when 'E':  EDI::E::Interchange.parse( hnd, auto_validate )
-      when 'I':  EDI::I::Interchange.parse( hnd, auto_validate )
-      when 'XE': EDI::E::Interchange.parse_xml( REXML::Document.new(hnd) )
-      when 'XI': EDI::I::Interchange.parse_xml( REXML::Document.new(hnd) )
+      when 'BZ' then Interchange.parse( EDI::Bzip2Reader.new( hnd ) ) # see "peek"
+      when 'GZ' then Interchange.parse( Zlib::GzipReader.new( hnd ) )
+      when 'E'  then  EDI::E::Interchange.parse( hnd, auto_validate )
+      when 'I'  then  EDI::I::Interchange.parse( hnd, auto_validate )
+      when 'XE' then EDI::E::Interchange.parse_xml( REXML::Document.new(hnd) )
+      when 'XI' then EDI::I::Interchange.parse_xml( REXML::Document.new(hnd) )
       else raise "#{rc}: Unsupported format key - don\'t know how to proceed!"
       end
     end
@@ -489,13 +489,13 @@ module EDI
         # Does not exist yet!
 #      when 'BZ': Interchange.peek( Zlib::Bzip2Reader.new( hnd ) )
         # Temporary substitute, Unix/Linux only, low performance:
-      when 'BZ': Interchange.peek( EDI::Bzip2Reader.new( hnd ) )
+      when 'BZ' then Interchange.peek( EDI::Bzip2Reader.new( hnd ) )
 
-      when 'GZ': Interchange.peek( Zlib::GzipReader.new( hnd ) )
-      when 'E':  EDI::E::Interchange.peek( hnd )
-      when 'I':  EDI::I::Interchange.peek( hnd )
-      when 'XE': EDI::E::Interchange.peek_xml( REXML::Document.new(hnd) )
-      when 'XI': EDI::I::Interchange.peek_xml( REXML::Document.new(hnd) )
+      when 'GZ' then Interchange.peek( Zlib::GzipReader.new( hnd ) )
+      when 'E'  then EDI::E::Interchange.peek( hnd )
+      when 'I'  then EDI::I::Interchange.peek( hnd )
+      when 'XE' then EDI::E::Interchange.peek_xml( REXML::Document.new(hnd) )
+      when 'XI' then EDI::I::Interchange.peek_xml( REXML::Document.new(hnd) )
       else raise "#{rc}: Unsupported format key - don\'t know how to proceed!"
       end
     end
@@ -514,13 +514,13 @@ module EDI
 
       re  = /(<\?xml.*?)?DOCTYPE\s+Interchange.*?\<Interchange\s+.*?standard\_key\s*=\s*(['"])(.)\2/m
       case buf
-      when /^(UNA......)?\r?\n?U[IN]B.UNO[A-Z].[1-4]/: 'E'  # UN/EDIFACT
-      when /^EDI_DC/: 'I'  # SAP IDoc
-      when re : 'X'+$3     # XML, Doctype = Interchange, syntax standard key (E, I, ...) postfix
-      when /^\037\213/: 'GZ' # gzip
-      when /^\037\235/: 'Z'  # compress
-      when /^\037\036/: 'z'  # pack
-      when /^BZh[0-\377]/:  'BZ' # bzip2
+      when /^(UNA......)?\r?\n?U[IN]B.UNO[A-Z].[1-4]/ then 'E'  # UN/EDIFACT
+      when /^EDI_DC/ then 'I'  # SAP IDoc
+      when re then 'X'+$3     # XML, Doctype = Interchange, syntax standard key (E, I, ...) postfix
+      when /^\037\213/ then 'GZ' # gzip
+      when /^\037\235/ then 'Z'  # compress
+      when /^\037\036/ then 'z'  # pack
+      when /^BZh[0-\377]/ then  'BZ' # bzip2
       else; "?? (stream starts with: #{buf[0..15]})"
       end
     end
