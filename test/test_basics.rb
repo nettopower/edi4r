@@ -104,13 +104,13 @@ class EDIFACT_Tests < Test::Unit::TestCase
     ic = n = nil
     assert_nothing_raised { ic = EDI::E::Interchange.new() }
 
-    # First group: No sender/recipient there to inherit: 
+    # First group: No sender/recipient there to inherit:
     # Expect 4 validation errors (2 x UNB, 2 x UNG)
     grp = ic.new_msggroup
     ic.add( grp, false )
     assert_equal( 4, ic.validate )
 
-    # Second group: Now let's see if sender/recipient inheritance works: 
+    # Second group: Now let's see if sender/recipient inheritance works:
     # Expect no more validation errors
     grp.header.cS006.d0040 = 'sender-g'
     grp.header.cS007.d0044 = 'recipient-g'
@@ -142,7 +142,7 @@ class EDIFACT_Tests < Test::Unit::TestCase
     assert_equal( 0, n )
     assert_nothing_raised{ File.open("groups.edi",'w') {|f| f.print ic} }
 
-    msg.header.cS009.d0057 = 'EAN011' # provoke a grp/msg difference 
+    msg.header.cS009.d0057 = 'EAN011' # provoke a grp/msg difference
     assert_nothing_raised{ n = ic.validate}
     assert_equal( 1, n )
 #    puts ic
@@ -194,16 +194,16 @@ class EDIFACT_Tests < Test::Unit::TestCase
 begin
   def test_interchange_parsing
     assert_nothing_raised {
-      ic = EDI::E::Interchange.parse( File.open( './O0002248720','r' ), false )
+      ic = EDI::E::Interchange.parse( File.open(File.join(File.dirname(__FILE__), 'O0002248720'),'r' ), false )
       ic.output_mode = :indented
       File.open("invoic.out", "w") {|hnd| hnd.print ic}
     }
     assert_nothing_raised {
-      ic = EDI::E::Interchange.parse( File.open( './remadv101.edi', 'r' ) )
+      ic = EDI::E::Interchange.parse( File.open(File.join(File.dirname(__FILE__), 'remadv101.edi'), 'r' ) )
       ic.output_mode = :indented
       File.open("remadv.out", "w") {|hnd| hnd.print ic}
 #      $stdout.write ic
     }
   end
 end
-end 
+end

@@ -28,21 +28,21 @@ require 'test/unit'
 class EDIFACT_REXML_Tests < Test::Unit::TestCase
 
   def setup
-    @ice = EDI::Interchange.parse(File.open("in2.edi"))
+    @ice = EDI::Interchange.parse(File.open(File.join File.dirname(__FILE__), "in2.edi"))
     @se  = @ice.to_s
-    @icg = EDI::Interchange.parse(File.open("groups.edi"))
+    @icg = EDI::Interchange.parse(File.open(File.join File.dirname(__FILE__), "groups.edi"))
   end
 
   def test_rexml
     @icx = nil
     assert_nothing_raised do
-      @icx = EDI::Interchange.parse(File.open("in2.xml"))
+      @icx = EDI::Interchange.parse(File.open(File.join File.dirname(__FILE__), "in2.xml"))
       assert_equal( 0, @icx.validate )
     end
 
     assert_equal( @se, @icx.to_s )  # EDIFACT representations equal?
-    
-    sx = File.open('in2.edi') { |hnd| hnd.read }.chop
+
+    sx = File.open(File.join File.dirname(__FILE__), 'in2.edi') { |hnd| hnd.read }.chop
     se = @se.sub(/PRI\+AAA:30::LIU\'PRI\+AAE:99::/,
                  'PRI+AAA:30.0::LIU\'PRI+AAE:99,0::')
     assert_equal( se, sx )  # EDIFACT representations equal file content?
@@ -73,9 +73,9 @@ class EDIFACT_REXML_Tests < Test::Unit::TestCase
 
     ic = nil
     assert_nothing_raised do
-      ic = EDI::E::Interchange.parse_xml( REXML::Document.new( sg.string )) 
+      ic = EDI::E::Interchange.parse_xml( REXML::Document.new( sg.string ))
     end
-    assert_equal( @icg.to_s, ic.to_s ) 
+    assert_equal( @icg.to_s, ic.to_s )
   end
 
 
