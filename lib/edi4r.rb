@@ -29,7 +29,7 @@ We anticipate to support several EDI syntax standards with this module:
 Our focus will be on UN/EDIFACT, the only global EDI standard we have
 that is independent of industry branches.
 
-Terms used will be borrowed from EDIFACT and applied to the other 
+Terms used will be borrowed from EDIFACT and applied to the other
 syntax standards whenever possible.
 
 A, E, and T are technically related in that they employ a compact
@@ -48,8 +48,8 @@ Message groups - if used - comprise a (group level) envelope and
 a sequence of messages.
 
 A message is a sequence of segments (sometimes also called records).
-A segment consists of a sequence of data elements (aka. fields), 
-either simple ones (DE) or composites (CDE). 
+A segment consists of a sequence of data elements (aka. fields),
+either simple ones (DE) or composites (CDE).
 Composites are sequences of simple data elements.
 
 Hence:
@@ -58,7 +58,7 @@ Hence:
 
 Syntax related information is maintained at the top (i.e. interchange) level.
 Lower-level objects like segments and DEs are aware of their syntax context
-through attibute "root", even though this context originates at the 
+through attibute "root", even though this context originates at the
 interchange level.
 
 Lower levels may add information. E.g. a message may add its message type,
@@ -80,7 +80,7 @@ which may or may not apply or be required.
 You can build a valid EDIFACT interchange simply by adding
 messages and segments - just follow your specifications.
 
-However, if you want this Ruby module to *validate* your result, 
+However, if you want this Ruby module to *validate* your result,
 the metadata are required. Similarly, in order to map from EDIFACT to
 other formats, accessing inbound segments though their hierarchical
 representation is much more convenient than processing them linearly.
@@ -141,7 +141,7 @@ module EDI
   # A simple utility class that fills a need not covered by "zlib".
   #
   # It is stripped to the essentials needed here internally.
-  # Not recommended for general use! The overhead of starting 
+  # Not recommended for general use! The overhead of starting
   # "bzcat" processes all the time is considerable, binding to a library
   # similar to 'zib' for the BZIP2 format would give much better results.
 
@@ -208,6 +208,7 @@ module EDI
     #   index, each, find_all, length, size, first, last
     def index(obj);   @a.index(obj);   end
     def each(&b);     @a.each(&b);     end
+    def map(&b);      @a.map(&b);      end
     def find_all(&b); @a.find_all(&b); end
     def size;         @a.size;         end
     def length;       @a.length;       end
@@ -325,7 +326,7 @@ module EDI
 
   #########################################################################
   #
-  # A collection with header and trailer, common to Interchange, MsgGroup, 
+  # A collection with header and trailer, common to Interchange, MsgGroup,
   # and Message. Typically, header and trailer are Segment instances.
   #
   class Collection_HT < Collection
@@ -448,7 +449,7 @@ module EDI
       @content = nil # nil if empty, :messages, or :groups
     end
 
-    # Auto-detect file content, optionally decompress, return an 
+    # Auto-detect file content, optionally decompress, return an
     # Interchange object of the sub-class that matches the (unzipped) content.
     #
     # This is a convenience method.
@@ -474,7 +475,7 @@ module EDI
       end
     end
 
-    # Auto-detect file content, optionally decompress, return an 
+    # Auto-detect file content, optionally decompress, return an
     # empty Interchange object of that sub-class with only the header filled.
     #
     # This is a convenience method.
@@ -502,7 +503,7 @@ module EDI
     # Auto-detect the given file format & content, return format key
     #
     # Convenience method, intended for internal use only
-    # 
+    #
     def Interchange.detect( hnd ) # :nodoc:
       buf = hnd.read( 256 )
       #
@@ -698,7 +699,7 @@ module EDI
     def []( xpath_expr )
       return super( xpath_expr ) if xpath_expr.is_a? Integer
 
-      msg_unsupported = "Unsupported XPath expression: #{xpath_expr}" 
+      msg_unsupported = "Unsupported XPath expression: #{xpath_expr}"
 
       case xpath_expr
 
@@ -736,7 +737,7 @@ module EDI
       self
     end
 
-    private 
+    private
 
     def add (obj)
       raise "Only DE or CDE allowed here" unless obj.is_a? DE or obj.is_a? CDE
@@ -749,7 +750,7 @@ module EDI
       results << self if or_self
       child_mode = (axis=='child')
       return results unless self.is_tnode?
-      
+
       # Now add all segments in self's "tail"
       msg = parent
       index = msg.index(self)
@@ -776,7 +777,7 @@ module EDI
 
     private
 
-    # Add a DE 
+    # Add a DE
 
     def add( obj )
       raise "Only DE allowed here" unless obj.is_a? DE
@@ -794,7 +795,7 @@ module EDI
   # a numeric value. Other objects are conceivable, as long as they
   # maintain a reasonable +to_s+ for their representation.
   #
-  # The external representation of the (abstract) value may further depend on 
+  # The external representation of the (abstract) value may further depend on
   # rules of the unterlying EDI standard. E.g., UN/EDIFACT comes with a set
   # of reserved characters and an escaping mechanism.
 
@@ -826,7 +827,7 @@ module EDI
       end.join(', ') + "\n"
     end
 
-  
+
     # Performs various validation checks and returns the number of
     # issues found (plus the value of +err_count+):
     #
@@ -911,7 +912,7 @@ module EDI
     end
 
 
-    # Returns +true+ if value is not +nil+. 
+    # Returns +true+ if value is not +nil+.
     # Note that assigning an empty string to a DE makes it "not empty".
     def empty?
       @value == nil
