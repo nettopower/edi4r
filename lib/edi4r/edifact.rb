@@ -66,7 +66,7 @@ module EDI::E
   Illegal_Charset_Patterns = Hash.new(/[^-A-Za-z0-9 .,()\/=!%"&*;<>'+:?\u{00}-\u{10ffff}}]+/)
   Illegal_Charset_Patterns['UNOA'] =     /[^-A-Z0-9 .,()\/=!%"&*;<>'+:?]+/
   Illegal_Charset_Patterns['UNOB'] =  /[^-A-Za-z0-9 .,()\/=!%"&*;<>'+:?]+/
-  Illegal_Charset_Patterns['UNOW'] =  /[^-A-Za-z0-9 .,()\/=!%"&*;<>'+:?]+/
+  Illegal_Charset_Patterns['UNOW'] =  /[^-A-Za-z0-9 .,()\/=!%"&*;<>'+:?\u{00}-\u{10ffff}}]+/
   # more to come...
 
   #########################################################################
