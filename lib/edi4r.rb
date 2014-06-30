@@ -517,10 +517,11 @@ module EDI
       when /^(UNA......)?\r?\n?U[IN]B.UNO[A-Z].[1-4]/ then 'E'  # UN/EDIFACT
       when /^EDI_DC/ then 'I'  # SAP IDoc
       when re then 'X'+$3     # XML, Doctype = Interchange, syntax standard key (E, I, ...) postfix
-      when /^\037\213/ then 'GZ' # gzip
-      when /^\037\235/ then 'Z'  # compress
-      when /^\037\036/ then 'z'  # pack
-      when /^BZh[0-\377]/ then  'BZ' # bzip2
+      # Ruby 2.x does not like these regexps so they are commented out
+      #when /^\037\213/ then 'GZ' # gzip
+      #when /^\037\235/ then 'Z'  # compress
+      #when /^\037\036/ then 'z'  # pack
+      #when /^BZh[0-\377]/ then  'BZ' # bzip2
       else; "?? (stream starts with: #{buf[0..15]})"
       end
     end
