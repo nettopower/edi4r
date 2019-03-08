@@ -114,6 +114,36 @@ require File.expand_path('../edi4r/diagrams', __FILE__)
 
 module EDI
 
+  # Internal
+
+  def self.warn(msg)
+    if @capture_warnings
+      @capture_warnings << msg
+    else
+      Kernel.warn msg
+    end
+  end
+
+  # Capture warnings into an array.
+  # Wrap your calls to `EDI::Interchange.parse` in a block, to
+  # capture warnings, instead of piping them to stderr.
+  # E.g.:
+  #     warnings = []
+  #     parsed = EDI.capture_warnings(warnings) do
+  #       EDI::Interchange.parse(file)
+  #     end
+  #     raise warnings.join("; ") if warnings.any?
+
+  def self.capture_warnings(warnings)
+    previous_warnings = @capture_warnings
+    @capture_warnings = warnings
+    begin
+      yield
+    ensure
+      @capture_warnings = previous_warnings
+    end
+  end
+
   #########################################################################
   #
   # Basic (abstract) class: Makes sure that all derived
@@ -133,10 +163,6 @@ module EDI
     def initialize (parent, root, name)
       @parent, @root, @name = parent, root, name
     end
-  end
-
-  def self.warn(msg)
-    Kernel.warn msg
   end
 
   #########################################################################
