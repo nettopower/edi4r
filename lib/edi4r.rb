@@ -117,8 +117,8 @@ module EDI
   # Internal
 
   def self.warn(msg)
-    if @capture_warnings
-      @capture_warnings << msg
+    if Thread.current[:edi_capture_warnings]
+      Thread.current[:edi_capture_warnings] << msg
     else
       Kernel.warn msg
     end
@@ -135,12 +135,12 @@ module EDI
   #     raise warnings.join("; ") if warnings.any?
 
   def self.capture_warnings(warnings)
-    previous_warnings = @capture_warnings
-    @capture_warnings = warnings
+    previous_warnings = Thread.current[:edi_capture_warnings]
+    Thread.current[:edi_capture_warnings] = warnings
     begin
       yield
     ensure
-      @capture_warnings = previous_warnings
+      Thread.current[:edi_capture_warnings] = previous_warnings
     end
   end
 
