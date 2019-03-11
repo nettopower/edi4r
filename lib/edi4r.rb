@@ -114,6 +114,36 @@ require File.expand_path('../edi4r/diagrams', __FILE__)
 
 module EDI
 
+  # Internal
+
+  def self.warn(msg)
+    if Thread.current[:edi_capture_warnings]
+      Thread.current[:edi_capture_warnings] << msg
+    else
+      Kernel.warn msg
+    end
+  end
+
+  # Capture warnings into an array.
+  # Wrap your calls to `EDI::Interchange.parse` in a block, to
+  # capture warnings, instead of piping them to stderr.
+  # E.g.:
+  #     warnings = []
+  #     parsed = EDI.capture_warnings(warnings) do
+  #       EDI::Interchange.parse(file)
+  #     end
+  #     raise warnings.join("; ") if warnings.any?
+
+  def self.capture_warnings(warnings)
+    previous_warnings = Thread.current[:edi_capture_warnings]
+    Thread.current[:edi_capture_warnings] = warnings
+    begin
+      yield
+    ensure
+      Thread.current[:edi_capture_warnings] = previous_warnings
+    end
+  end
+
   #########################################################################
   #
   # Basic (abstract) class: Makes sure that all derived
@@ -134,7 +164,6 @@ module EDI
       @parent, @root, @name = parent, root, name
     end
   end
-
 
   #########################################################################
   #
@@ -383,12 +412,12 @@ module EDI
       location = "#{parent.name} - #{@name}"
       if empty?
         if required?
-          warn "#{location}: Empty though mandatory!"
+          EDI.warn "#{location}: Empty though mandatory!"
           err_count += 1
         end
       else
         if rep && maxrep && rep > maxrep
-          warn "#{location}: Too often repeated: #{rep} > #{maxrep}!"
+          EDI.warn "#{location}: Too often repeated: #{rep} > #{maxrep}!"
           err_count += 1
         end
         each {|obj| err_count += obj.validate}
@@ -840,7 +869,7 @@ module EDI
       location = "DE #{parent.name}/#{@name}"
       if empty?
         if required?
-          warn "#{location}: Empty though mandatory!"
+          EDI.warn "#{location}: Empty though mandatory!"
           err_count += 1
         end
       else
@@ -848,7 +877,7 @@ module EDI
         # Charset check
         #
         if (pos = (value =~ root.illegal_charset_pattern))# != nil
-          warn "#{location}: Illegal character: #{value[pos].chr}"
+          EDI.warn "#{location}: Illegal character: #{value[pos].chr}"
           err_count += 1
         end
         #
@@ -864,7 +893,7 @@ module EDI
             md = re.match strval
             if md.nil?
               raise "#{location}: '#{strval}' - not matching format #@format"
-#              warn "#{strval} - not matching format #@format"
+#              EDI.warn "#{strval} - not matching format #@format"
 #              err_count += 1
             end
 
@@ -877,17 +906,17 @@ module EDI
             if required? and len != 0
               if len > _size.to_i
   #            if _upto.nil? and len != _size.to_i or len > _size.to_i
-                warn "Context in #{location}: #{_a_n_an}, #{_upto}, #{_size}; #{md[1]}, #{md[2]}, #{md[3]}"
-                warn "Length # mismatch in #{location}: #{len} vs. #{_size}"
+                EDI.warn "Context in #{location}: #{_a_n_an}, #{_upto}, #{_size}; #{md[1]}, #{md[2]}, #{md[3]}"
+                EDI.warn "Length # mismatch in #{location}: #{len} vs. #{_size}"
                 err_count += 1
-                #            warn "  (strval was: '#{strval}')"
+                #            EDI.warn "  (strval was: '#{strval}')"
               end
               if md[1] =~/^0+/
-                warn "#{strval} contains leading zeroes"
+                EDI.warn "#{strval} contains leading zeroes"
                 err_count += 1
               end
               if md[3] and md[3]=~ /.0+$/
-                warn "#{strval} contains trailing decimal sign/zeroes"
+                EDI.warn "#{strval} contains trailing decimal sign/zeroes"
                 err_count += 1
               end
             end
@@ -896,7 +925,7 @@ module EDI
 #            len = value.is_a?(Numeric) ? value.to_s.length : value.length
             len = value.to_s.length
             if _upto.nil? and len != $3.to_i or len > $3.to_i
-              warn "Length mismatch in #{location}: #{len} vs. #{_size}"
+              EDI.warn "Length mismatch in #{location}: #{len} vs. #{_size}"
               err_count += 1
             end
           else
@@ -905,7 +934,7 @@ module EDI
           end
 
         else
-          warn "#{location}: Illegal format: #{@format}!"
+          EDI.warn "#{location}: Illegal format: #{@format}!"
           err_count += 1
         end
       end

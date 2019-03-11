@@ -161,31 +161,31 @@ module EDI::E
       case fmt.to_s
       when '101'
         rc = str =~ /(\d\d)(\d\d)(\d\d)(.+)?/
-        raise msg unless rc and rc==0; warn msg if $4
+        raise msg unless rc and rc==0; EDI.warn msg if $4
         year = $1.to_i
         year += (year < 69) ? 2000 : 1900 # See ParseDate
         dtm = Time.local(year, $2, $3)
 
       when '102'
         rc = str =~ /(\d\d\d\d)(\d\d)(\d\d)(.+)?/
-        raise msg unless rc and rc==0; warn msg if $4
+        raise msg unless rc and rc==0; EDI.warn msg if $4
         dtm = Time.local($1, $2, $3)
 
       when '201'
         rc = str =~ /(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(.+)?/
-        raise msg unless rc and rc==0; warn msg if $6
+        raise msg unless rc and rc==0; EDI.warn msg if $6
         year = $1.to_i
         year += (year < 69) ? 2000 : 1900 # See ParseDate
         dtm = Time.local(year, $2, $3, $4, $5)
 
       when '203'
         rc = str =~ /(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(.+)?/
-        raise msg unless rc and rc==0; warn msg if $6
+        raise msg unless rc and rc==0; EDI.warn msg if $6
         dtm = Time.local($1, $2, $3, $4, $5)
 
       when '204'
         rc = str =~ /(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(.+)?/
-        raise msg unless rc and rc==0; warn msg if $7
+        raise msg unless rc and rc==0; EDI.warn msg if $7
         dtm = Time.local($1, $2, $3, $4, $5, $6)
 
       else
@@ -509,8 +509,8 @@ module EDI::E
         when /\n/, /\r\n/, ''
           # ignore linebreaks at end of file, do not warn.
         else
-          warn "WARNING: Data found after #{tag_exit} segment - ignored!"
-          warn "Found: \'#{last_seg}\'"
+          EDI.warn "WARNING: Data found after #{tag_exit} segment - ignored!"
+          EDI.warn "Found: \'#{last_seg}\'"
         end
       end
       trailer = Segment.parse(ic, last_seg, tag_exit)
@@ -520,11 +520,11 @@ module EDI::E
       err_flag = false
       segment_list.each do |seg|
         if seg =~ init_seg
-          warn "ERROR: Another interchange header found in file!"
+          EDI.warn "ERROR: Another interchange header found in file!"
           err_flag = true
         end
         if seg =~ exit_seg
-          warn "ERROR: Another interchange trailer found in file!"
+          EDI.warn "ERROR: Another interchange trailer found in file!"
           err_flag = true
         end
       end
@@ -748,28 +748,28 @@ module EDI::E
 
     def validate( err_count=0 )
       if (h=self.size) != (t=@trailer.d0036)
-        warn "Counter UNZ/UIZ, DE0036 does not match content: #{t} vs. #{h}"
+        EDI.warn "Counter UNZ/UIZ, DE0036 does not match content: #{t} vs. #{h}"
         err_count += 1
       end
       if (h=@header.cS001.d0001) != @charset
-        warn "Charset UNZ/UIZ, S001/0001 mismatch: #{h} vs. #@charset"
+        EDI.warn "Charset UNZ/UIZ, S001/0001 mismatch: #{h} vs. #@charset"
         err_count += 1
       end
       if (h=@header.cS001.d0002) != @version
-        warn "Syntax version UNZ/UIZ, S001/0002 mismatch: #{h} vs. #@version"
+        EDI.warn "Syntax version UNZ/UIZ, S001/0002 mismatch: #{h} vs. #@version"
         err_count += 1
       end
       check_consistencies
 
       if is_iedi?
         if (t=@trailer.cS302.d0300) != (h=@header.cS302.d0300)
-          warn "UIB/UIZ mismatch in initiator ref (S302/0300): #{h} vs. #{t}"
+          EDI.warn "UIB/UIZ mismatch in initiator ref (S302/0300): #{h} vs. #{t}"
           err_count += 1
         end
         # FIXME: Add more I-EDI checks
       else
         if (t=@trailer.d0020) != (h=@header.d0020)
-          warn "UNB/UNZ mismatch in refno (DE0020): #{h} vs. #{t}"
+          EDI.warn "UNB/UNZ mismatch in refno (DE0020): #{h} vs. #{t}"
           err_count += 1
         end
       end
@@ -1028,12 +1028,12 @@ module EDI::E
       # Consistency checks
 
       if (a=@trailer.d0060) != (b=self.size)
-        warn "UNE: DE 0060 (#{a}) does not match number of messages (#{b})"
+        EDI.warn "UNE: DE 0060 (#{a}) does not match number of messages (#{b})"
         err_count += 1
       end
       a, b = @trailer.d0048, @header.d0048
       if a != b
-        warn "UNE: DE 0048 (#{a}) does not match reference in UNG (#{b})"
+        EDI.warn "UNE: DE 0048 (#{a}) does not match reference in UNG (#{b})"
         err_count += 1
       end
 
@@ -1294,7 +1294,7 @@ module EDI::E
       # Consistency checks
 
       if (a=@trailer.d0074) != (b=self.size+2)
-        warn "DE 0074 (#{a}) does not match number of segments (#{b})"
+        EDI.warn "DE 0074 (#{a}) does not match number of segments (#{b})"
         err_count += 1
       end
 
@@ -1304,7 +1304,7 @@ module EDI::E
         a, b = @trailer.d0062, @header.d0062
       end
       if a != b
-        warn "Trailer reference (#{a}) does not match header reference (#{b})"
+        EDI.warn "Trailer reference (#{a}) does not match header reference (#{b})"
         err_count += 1
       end
 
@@ -1312,27 +1312,27 @@ module EDI::E
         ung = parent.header; s008 = ung.cS008; s009 = header.cS009
         a, b = s009.d0065, ung.d0038
         if a != b
-          warn "Message type (#{a}) does not match that of group (#{b})"
+          EDI.warn "Message type (#{a}) does not match that of group (#{b})"
           err_count += 1
         end
         a, b = s009.d0052, s008.d0052
         if a != b
-          warn "Message version (#{a}) does not match that of group (#{b})"
+          EDI.warn "Message version (#{a}) does not match that of group (#{b})"
           err_count += 1
         end
         a, b = s009.d0054, s008.d0054
         if a != b
-          warn "Message release (#{a}) does not match that of group (#{b})"
+          EDI.warn "Message release (#{a}) does not match that of group (#{b})"
           err_count += 1
         end
         a, b = s009.d0051, ung.d0051
         if a != b
-          warn "Message responsible agency (#{a}) does not match that of group (#{b})"
+          EDI.warn "Message responsible agency (#{a}) does not match that of group (#{b})"
           err_count += 1
         end
         a, b = s009.d0057, s008.d0057
         if a != b
-          warn "Message association assigned code (#{a}) does not match that of group (#{b})"
+          EDI.warn "Message association assigned code (#{a}) does not match that of group (#{b})"
           err_count += 1
         end
 
